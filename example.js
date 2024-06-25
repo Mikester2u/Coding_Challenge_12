@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', function () {
         .attr("height", svgHeight)
         .append("g")
         .attr("transform", 'translate(${margin.left},${margin.top})');
-})
 
 d3.csv("mock_stock_data.csv").then(data => {
     data.forEach(d => {
@@ -70,4 +69,39 @@ function updateChart(data) {
             .attr("stroke", "greenyellow")
             .attr("stroke-width", 1.5)
             .attr("d", line);
-}
+        
+            svg.selectAll("dot")
+            .data(data)
+            .enter().append("circle")
+            .attr("r", 5)
+            .attr("cx", d => x(d.Date))
+            .attr("cy", d => y(d.Value))
+            .on("mouseover", (event, d) => {
+                const [x, y] = d3.pointer(event);
+                d3.select("#tooltip")
+                    .style("left", x + "px")
+                    .style("top", y + "px")
+                    .style("opacity", 1)
+                    .html(`Stock: ${d.StockName}<br>Date: ${d.Date.toLocaleDateString()}<br>Value: ${d.Value}`);
+            })
+            .on("mouseout", () => {
+                d3.select("#tooltip")
+                    .style("opacity", 0);
+            });
+    }
+
+
+    updateChart(data.filter(d => d.StockName === stockNames[0]));
+});
+
+
+d3.select("body").append("div")
+    .attr("id", "tooltip")
+    .style("position", "absolute")
+    .style("background-color", "white")
+    .style("border", "solid")
+    .style("border-width", "1px")
+    .style("border-radius", "5px")
+    .style("padding", "10px")
+    .style("opacity", 0);
+});
